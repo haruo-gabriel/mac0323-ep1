@@ -12,7 +12,10 @@ class Pista {
         int id;
         bool podeDecolar;
         bool podePousar;
-        int livre; // A pista está livre se == 1. Se for ocupada, muda seu valor para -2
+        int livre;
+        // A cada rodada, livre é incrementado.
+        // A pista está livre se livre >= 1, e ocupada se livre <= 0.
+        // Se for ocupada, imediatamente muda seu valor para -2 (cooldown).
 
     public:
         // Construtor
@@ -78,7 +81,11 @@ class Aviao {
 };
 
 int main() {
+    // Construção das pistas
 
+    // Construção dos aviões
+
+    // Construção da fila de aviões
     queue<Aviao> fila;
 
 
