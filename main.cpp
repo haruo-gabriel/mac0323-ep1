@@ -3,7 +3,10 @@
 // NUSP: 13671636
 
 #include <iostream>
+#include <stdlib.h>
 #include <queue>
+#include <vector>
+#include <string>
 
 using namespace std;
 
@@ -52,24 +55,20 @@ class Aviao {
 
     public:
         // Construtor
-        Aviao(string id, string codigo, int combustivel, int tempoVoo){
-            this->id = setId(id);
-            this->codigo = setCodigo(codigo);
+        Aviao(int combustivel, int tempoVoo){
+            id = setId;
             this->combustivel = setCombustivel(combustivel);
             this->tempoVoo = setTempoVoo(tempoVoo);
         }
 
         // Metodos
 
+
         // Getters e Setters
-        void setId() {
-
+        string setId(){
+            string temp = rand()
         }
 
-        void setCodigo() {
-
-        }
-        
         void setCombustivel() {
 
         }
@@ -81,12 +80,40 @@ class Aviao {
 };
 
 int main() {
-    // Construção das pistas
+    int T, K, C, V;
+    float probEmergencia, probPouso, probDecolagem;
+    probDecolagem = 1.0 - probDecolagem;
 
-    // Construção dos aviões
+    vector<Pista> pistas;
+    Pista pista1(1, 1, 1);
+    Pista pista2(2, 1, 1);
+    Pista pista3(3, 1, 0);
 
-    // Construção da fila de aviões
-    queue<Aviao> fila;
+    vector<Aviao> avioes;
+    queue<Aviao*> fila;
+    
+    char Alphabets[26] = {'a','b','c','d','e','f','g','h', 'i','j','k','l','m','n','o','p','q', 'r','s','t','u','v','w','x','y','z'};
+
+    // Entradas
+
+    // Construção do algoritmo
+
+    for (int t = 0; t < T; t++){
+        int qtdAvioes = probAvioes(K);
+        for (int i = 0; i < qtdAvioes; i++){
+            Aviao aviao(C, V);
+            // a quantidade de combustivel que um aviao chega no aeroporto é fixa?
+            avioes.push_back(aviao);
+        }
+
+        for (avioes.begin())
+        
+        for (auto it = avioes.begin(); it != avioes.end(); it++){
+            //decrementar combustivel
+            //
+        }
+
+    }
 
 
     return 0;
