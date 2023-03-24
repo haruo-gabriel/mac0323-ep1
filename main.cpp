@@ -2,119 +2,118 @@
 // Nome: Gabriel Haruo Hanai Takeuchi
 // NUSP: 13671636
 
-#include <iostream>
-#include <stdlib.h>
-#include <queue>
-#include <vector>
-#include <string>
+#include <bits/stdc++.h>
 
 using namespace std;
 
+#define SRAND 100
+
 class Pista {
-    private:
-        int id;
-        bool podeDecolar;
-        bool podePousar;
-        int livre;
-        // A cada rodada, livre é incrementado.
-        // A pista está livre se livre >= 1, e ocupada se livre <= 0.
-        // Se for ocupada, imediatamente muda seu valor para -2 (cooldown).
+public:
+    bool podeDecolar;
+    bool podePousar;
+    int livre;
+    // A cada rodada, livre é incrementado.
+    // A pista está livre se livre >= 1, e ocupada se livre <= 0.
+    // Se for ocupada, imediatamente muda seu valor para -2 (cooldown).
 
-    public:
-        // Construtor
-        Pista(int id, bool podeDecolar, bool podePousar) {
-            this->id = setId(id);
-            this->podeDecolar = setPodeDecolar(podeDecolar);
-            this->podePousar = setPodePousar(podePousar);
-            this->livre = true;
-        }
-
-        // Metodos
-
-        // Getters e Setters
-        void setId() {
-
-        }
-
-        void setPodeDecolar() {
-
-        }
-        
-        void setPodePousar() {
-
-        }
-
-}
-
-class Aviao {
-    private:
-        string id; // exemplo: go123 (companhia GOL, aviao 123)
-        string codigo; // o codigo tem exatamente 3 letras - como otimizar o type do codigo?
-        int combustivel;
-        int tempoVoo;
-
-    public:
-        // Construtor
-        Aviao(int combustivel, int tempoVoo){
-            id = setId;
-            this->combustivel = setCombustivel(combustivel);
-            this->tempoVoo = setTempoVoo(tempoVoo);
-        }
-
-        // Metodos
-
-
-        // Getters e Setters
-        string setId(){
-            string temp = rand()
-        }
-
-        void setCombustivel() {
-
-        }
-
-        void setTempoVoo() {
-
-        }
-
-};
-
-int main() {
-    int T, K, C, V;
-    float probEmergencia, probPouso, probDecolagem;
-    probDecolagem = 1.0 - probDecolagem;
-
-    vector<Pista> pistas;
-    Pista pista1(1, 1, 1);
-    Pista pista2(2, 1, 1);
-    Pista pista3(3, 1, 0);
-
-    vector<Aviao> avioes;
-    queue<Aviao*> fila;
-    
-    char Alphabets[26] = {'a','b','c','d','e','f','g','h', 'i','j','k','l','m','n','o','p','q', 'r','s','t','u','v','w','x','y','z'};
-
-    // Entradas
-
-    // Construção do algoritmo
-
-    for (int t = 0; t < T; t++){
-        int qtdAvioes = probAvioes(K);
-        for (int i = 0; i < qtdAvioes; i++){
-            Aviao aviao(C, V);
-            // a quantidade de combustivel que um aviao chega no aeroporto é fixa?
-            avioes.push_back(aviao);
-        }
-
-        for (avioes.begin())
-        
-        for (auto it = avioes.begin(); it != avioes.end(); it++){
-            //decrementar combustivel
-            //
-        }
-
+    // Construtor
+    Pista(bool podeDecolar, bool podePousar) {
+        this->podeDecolar = podeDecolar;
+        this->podePousar = podePousar;
+        this->livre = true;
     }
 
+    // Metodos
+};
+
+class Aviao {
+public:
+    string id, codigo;
+    int combustivel, tempoVoo;
+    bool ehEmergencia, ehPouso;
+
+    // Construtor
+    Aviao(float Pp, float Pe, int C, int V) {
+        this->id = setId();
+        this->ehPouso = setEhPouso(Pp);
+        this->ehEmergencia = setEhEmergencia(Pe);
+        this->combustivel = setCombustivel(C);
+        this->tempoVoo = setTempoVoo(V);
+        this->codigo = setCodigo(this->ehPouso);
+    }
+
+    // Metodos
+    string setId() {
+        string temp(1, 'A' + (rand() % 26));
+        temp += 'A' + (rand() % 26);
+        for (int i = 0; i < 3; i++)
+            temp += '0' + (rand() % 10);
+    }
+
+    bool setEhPouso(float Pp) {
+        return (float)rand() / RAND_MAX < Pp;
+    }
+
+    bool setEhEmergencia(float Pe) {
+        return (float)rand() / RAND_MAX < Pe;
+    }
+
+    int setCombustivel(int C) {
+        return rand() % C + 1;
+    }
+
+    int setTempoVoo(int V) {
+        return rand() % V + 1;
+    }
+
+    string setCodigo(bool ehPouso) {
+        string temp;
+        temp += ehPouso ? 'P' : 'D';
+        temp += 'A' + (rand() % 26);
+        temp += 'A' + (rand() % 26);
+        return temp;
+    }
+};
+
+void gerarPistas(vector<Pista> &pistas) {
+    pistas.push_back(Pista(1, 1)); // pistas[0] é a pista 1
+    pistas.push_back(Pista(1, 1)); // pistas[1] é a pista 2
+    pistas.push_back(Pista(1, 0)); // pistas[2] é a pista 3, a exclusiva de decolagem
+}
+
+auto comparaAviao = [](Aviao* a1, Aviao* a2) {
+    return a1->ehEmergencia > a2->ehEmergencia;
+};
+
+int probAvioes(int K) {
+    return rand() % (K + 1);
+}
+
+int main() {
+    srand(SRAND);
+
+    int T, K, C, V;
+    float Pp, Pe; // Pd = 1 - Pp
+
+    vector<Pista> pistas;
+    gerarPistas(pistas);
+
+    vector<Aviao> avioesVector;
+    priority_queue<Aviao*, std::vector<Aviao*>, decltype(comparaAviao)> avioesQueue(comparaAviao);
+
+    cout << "Digite T, K, Pp, Pe, C e V, respectivamente: ";
+    cin >> T >> K >> Pp >> Pe >> C >> V; 
+
+    // TODO pensar nesse loop no papel!
+    for (int t = 0; t < T; t++) {
+        int nAvioes = probAvioes(K);
+        for (int i = 0; i < nAvioes; i++) {
+            Aviao aviao(C, V, Pp, Pe);
+            avioesVector.push_back(aviao);
+            avioesQueue.push(&avioesVector.back());
+        } 
+    }
 
     return 0;
 }
