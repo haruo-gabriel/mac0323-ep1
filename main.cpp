@@ -1,23 +1,6 @@
 #include "aerolib.hpp"
 
 // teste de branch
-// template<typename T, typename Container = vector<T>, typename Compare = less<typename Container::value_type>>
-// class custom_priority_queue : public priority_queue<T, Container, Compare> {
-// public:
-//     custom_priority_queue(const Compare& comp = Compare(), const Container& cont = Container())
-//     : priority_queue<T, Container, Compare>(comp, cont) {}
-
-//     bool remove(const T& value) {
-//         auto it = find(this->c.begin(), this->c.end(), value);
-//         if (it == this->c.end()) return false;
-//         if (it == this->c.begin()) this->pop();
-//         else {
-//             this->c.erase(it);
-//             make_heap(this->c.begin(), this->c.end(), this->comp);
-//         }
-//         return true;
-//     }
-// };
 
 auto comparaAviao = [](Aviao* a1, Aviao* a2) {
     return a1->prioridade < a2->prioridade;
@@ -32,17 +15,13 @@ int main() {
     vector<Pista> pistas;
     gerarPistas(pistas);
 
-    // vector<AviaoPouso*> avioesPouso;
-    // vector<AviaoDecolagem*> avioesDecolagem;
-    vector<Aviao*> avioesPouso;
-    vector<Aviao*> avioesDecolagem;
+    list<Aviao*> avioesList;
     priority_queue<Aviao*, vector<Aviao*>, decltype(comparaAviao)> avioesQueue(comparaAviao);
 
     // cout << "Digite T, K, Pp, Pe, C e V, respectivamente: ";
     // cin >> T >> K >> Pp >> Pe >> C >> V; 
     T = 50; K = 3; Pp = 0.5; Pe = 0.05; C = 5; V = 5;
 
-    // TODO pensar nesse loop no papel!
     for (int t = 0; t < T; t++) {
 
         cout << "Tempo " << t+1 << endl << endl;
@@ -56,9 +35,9 @@ int main() {
             if (ehPouso) {
                 Aviao* aviao = new Aviao(Pp, Pe, ehPouso, C, -1);
                 // cout << "combustivel " << aviao->combustivel << endl;
-                avioesPouso.push_back(aviao);
+                avioesList.push_back(aviao);
                 avioesQueue.push(aviao);
-                avioesPouso.back()->naQueue = true;
+                avioesList.back()->naQueue = true;
             } else {
                 Aviao* aviao = new Aviao(Pp, Pe, ehPouso, -1, V);
                 // cout << "tempoVoo " << aviao->tempoVoo << endl;
