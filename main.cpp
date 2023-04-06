@@ -3,24 +3,6 @@
 
 #include "aerolib.hpp"
 
-// template<typename T, typename Container = vector<T>, typename Compare = less<typename Container::value_type>>
-// class custom_priority_queue : public priority_queue<T, Container, Compare> {
-// public:
-//     custom_priority_queue(const Compare& comp = Compare(), const Container& cont = Container())
-//     : priority_queue<T, Container, Compare>(comp, cont) {}
-
-//     bool remove(const T& value) {
-//         auto it = find(this->c.begin(), this->c.end(), value);
-//         if (it == this->c.end()) return false;
-//         if (it == this->c.begin()) this->pop();
-//         else {
-//             this->c.erase(it);
-//             make_heap(this->c.begin(), this->c.end(), this->comp);
-//         }
-//         return true;
-//     }
-// };
-
 auto comparaAviao = [](Aviao* a1, Aviao* a2) {
     cout << "comparando " << a1->id << " e " << a2->id << endl;
     cout << "a1->prioridade " << a1->prioridade << endl;
@@ -34,12 +16,13 @@ int main() {
 
     int T, K, C, V;
     float Pp, Pe; // Pd = 1 - Pp
-    int numEmergenciasTerminadas=0;
+    int numEmergenciasTerminadas=0, numPousos=0, numDecolagens=0;
     float tempoMedioEsperaPouso=0, tempoMedioEsperaDecolagem=0, qtdeMediaCombustivelEsperandoPousar=0, qtdeMediaCombustivelPousaram=0;
+    // TODO dar um jeito de colocar qtdeMediaCombustivelEsperandoPousar.
+    // TODO criar uma lista ligada só com os que não estão na fila, para poder calcular a média de combustível deles.
 
     vector<Pista> pistas; gerarPistas(pistas);
-    vector<Aviao*> avioesPouso;
-    vector<Aviao*> avioesDecolagem;
+    vector<Aviao*> avioesVector;
     priority_queue<Aviao*, vector<Aviao*>, decltype(comparaAviao)> avioesQueue(comparaAviao);
 
     // cout << "Digite T, K, Pp, Pe, C e V, respectivamente: ";
@@ -47,42 +30,39 @@ int main() {
     T = MAXRODADAS; K = 3; Pp = 0.5; Pe = 0.05; C = 5; V = 5;
 
     for (int t = 0; t < T; t++) {
-
         // relatório pré-rodada
         cout << "Tempo " << t+1 << endl;
         cout << endl;
         if (t > 0) {
             cout << "Relatório pré-rodada:" << endl;
             cout << "Pistas: " << pistas[0].livre << " | " << pistas[1].livre << " | " << pistas[2].livre << endl << endl;
-            for (Aviao* it : avioesPouso) {
-                if (it->naQueue)
-                    cout << "Avião " << it->id << " esperando para pousar com combustível " << it->contador << " e prioridade " << it->prioridade << endl;
+            for (Aviao* it : avioesVector) {
+                if (it->naQueue) {
+                    if (it->ehPouso) {
+                        cout << "Avião " << it->id << " esperando para pousar com combustível " << (it->combustivel - it->contador) << " e prioridade " << it->prioridade << endl;
+                    } else {
+                        cout << "Avião " << it->id << " esperando para decolar com tempo de voo " << (it->tempoVoo - it->contador) << " e prioridade " << it->prioridade << endl;
+                    }
+                }
+                cout << endl;
             }
-            for (Aviao* it : avioesDecolagem) {
-                if (it->naQueue)
-                    cout << "Avião " << it->id << " esperando para decolar com tempo de voo " << it->contador << " e prioridade " << it->prioridade << endl;
-            }
-            cout << endl;
-        }
 
         // gerar aviões
         int nAvioes = probAvioes(K);
         cout << "Chegaram " << nAvioes << " aviões" << endl << endl;
         for (int i = 0; i < nAvioes; i++) {
             bool ehPouso = setEhPouso(Pp);
+            Aviao* aviao;
             if (ehPouso) {
-                Aviao* aviao = new Aviao(Pp, Pe, ehPouso, C, -1);
-                // cout << "combustivel " << aviao->combustivel << endl;
-                avioesPouso.push_back(aviao);
-                avioesQueue.push(aviao);
-                avioesPouso.back()->naQueue = true;
+                aviao = new Aviao(Pp, Pe, ehPouso, C, -1);
+                numPousos++:
             } else {
-                Aviao* aviao = new Aviao(Pp, Pe, ehPouso, -1, V);
-                // cout << "tempoVoo " << aviao->tempoVoo << endl;
-                avioesDecolagem.push_back(aviao);
-                avioesQueue.push(aviao);
-                avioesDecolagem.back()->naQueue = true;
+                aviao = new Aviao(Pp, Pe, ehPouso, -1, V);
+                numDecolagens++;
             }
+            avioesVector.push_back(aviao);
+            avioesQueue.push(aviao);
+            avioesVector.back()->naQueue = true;
         } 
 
         // botar aviões nas pistas
@@ -91,13 +71,19 @@ int main() {
             cout << "id: " << avioesQueue.top()->id << endl;
             cout << "prioridade: " << avioesQueue.top()->prioridade << endl;
             cout << "ehPouso: " << avioesQueue.top()->ehPouso << endl;
-            if (avioesQueue.top()->ehPouso) cout << "combustivel: " << avioesQueue.top()->combustivel << endl;
-            else cout << "tempoVoo: " << avioesQueue.top()->tempoVoo << endl;
+            if (avioesQueue.top()->ehPouso) cout << "combustivel: " << (avioesQueue.top()->combustivel - avioesQueue.top()->contador) << endl;
+            else cout << "tempoVoo: " << (avioesQueue.top()->tempoVoo - avioesQueue.top()->contador) << endl;
             cout << endl;
 
             for (int i = 0; i < 3; i++) {
                 if (pistas[i].livre == 1) {
                     if (i == 0 || i == 1 || (i == 2 && !avioesQueue.top()->ehPouso)) {
+                        if (avioesQueue.top()->ehPouso) {
+                            tempoMedioEsperaPouso += avioesQueue.top()->contador;
+                            qtdeMediaCombustivelPousaram += avioesQueue.top()->combustivel - avioesQueue.top()->contador;
+                        } else {
+                            tempoMedioEsperaDecolagem += avioesQueue.top()->contador;
+                        }
                         avioesQueue.top()->naQueue = false;
                         avioesQueue.pop();
                         pistas[i].cooldown();
@@ -115,50 +101,42 @@ int main() {
             cout << "id: " << avioesQueue.top()->id << endl;
             cout << "prioridade: " << avioesQueue.top()->prioridade << endl;
             cout << "ehPouso: " << avioesQueue.top()->ehPouso << endl;
-            if (avioesQueue.top()->ehPouso) cout << "combustivel: " << avioesQueue.top()->contador << endl;
-            else cout << "tempoVoo: " << avioesQueue.top()->contador << endl;
-            cout << endl;
 
+            if (avioesQueue.top()->ehPouso) {
+                cout << "combustivel: " << (avioesQueue.top()->combustivel - avioesQueue.top()->contador) << endl;
+                tempoMedioEsperaPouso += avioesQueue.top()->contador;
+            }
+            else{
+                cout << "tempoVoo: " << (avioesQueue.top()->tempoVoo - avioesQueue.top()->contador) << endl;
+                tempoMedioEsperaDecolagem += avioesQueue.top()->contador;
+            }
+            cout << endl;
             avioesQueue.top()->naQueue = false;
             avioesQueue.pop();
             numEmergenciasTerminadas++;
         }
-        // for (Aviao* it : avioesPouso) {
-        //     if (it->naQueue && it->prioridade >= 2){
-        //         avioesQueue.top()->naQueue = false;
-        //     }
-        // }
-        // for (Aviao* it : avioesDecolagem) {
-        //     if (it->naQueue && it->prioridade >= 2){
-        //         avioesQueue.top()->naQueue = false;
-        //     }
-        // }
 
         // relatório da rodada
         cout << "Relatório da rodada:" << endl;
         cout << "Pistas: " << pistas[0].livre << " | " << pistas[1].livre << " | " << pistas[2].livre << endl;
         cout << endl;
-        for (Aviao* it : avioesPouso) {
+        for (Aviao* it : avioesVector) {
             if (it->naQueue) {
-                cout << "Avião " << it->id << " esperando para pousar com combustível " << it->combustivel - it->contador << " e prioridade " << it->prioridade << endl;
-                qtdeMediaCombustivelEsperandoPousar += it->combustivel - it->contador; 
-            } else {
-                tempoMedioEsperaPouso += it->contador;
-                qtdeMediaCombustivelPousaram += it->combustivel;
-            }
-        }
-        for (Aviao* it : avioesDecolagem) {
-            if (it->naQueue){
-                cout << "Avião " << it->id << " esperando para decolar com tempo de voo " << it->tempoVoo << " e prioridade " << it->prioridade << endl;
-            } else {
-                tempoMedioEsperaDecolagem += it->contador;
-            }
+                if (it->ehPouso) {
+                    cout << "Avião " << it->id << " esperando para pousar com combustível " << (it->combustivel - it->contador) << " e prioridade " << it->prioridade << endl;
+                    qtdeMediaCombustivelEsperandoPousar += (it->combustivel - it->contador); 
+                } else {
+                    if (it->ehPouso) {
+                        cout << "Avião " << it->id << " esperando para decolar com tempo de voo " << (it->tempoVoo - it->contador) << " e prioridade " << it->prioridade << endl;
+                    }
+                }
+            } 
         }
         cout << endl;
-        cout << "Tempo médio de espera para pousar: " << tempoMedioEsperaPouso/avioesPouso.size() << endl;
-        cout << "Tempo médio de espera para decolar: " << tempoMedioEsperaDecolagem/avioesDecolagem.size() << endl;
-        cout << "Quantidade média de combustível dos que ainda não pousaram: " << qtdeMediaCombustivelEsperandoPousar/avioesPouso.size() << endl;
-        cout << "Quantidade média de combustível dos que já pousaram: " << qtdeMediaCombustivelPousaram/avioesPouso.size() << endl;
+        cout << "Tempo médio de espera para pousar: " << tempoMedioEsperaPouso/numPousos << endl;
+        cout << "Tempo médio de espera para decolar: " << tempoMedioEsperaDecolagem/numDecolagens << endl;
+        cout << "Quantidade média de combustível dos que ainda não pousaram: " << qtdeMediaCombustivelEsperandoPousar/avioesVector.size() << endl;
+        cout << "Quantidade média de combustível dos que já pousaram: " << qtdeMediaCombustivelPousaram/avioesVector.size() << endl;
         cout << "Quantidade de emergências finalizadas: " << numEmergenciasTerminadas << endl;
         cout << endl << "----------------------------------------" << endl << endl;
 
@@ -166,13 +144,10 @@ int main() {
         for (int i = 0; i < 3; i++) {
             if (pistas[i].livre < 1) pistas[i].livre++;
         }
-        for (Aviao* it : avioesPouso) {
-            if (it->naQueue) it->contador++;
-        } 
-        for (Aviao* it : avioesDecolagem) {
-            if (it->naQueue) it->contador++;
-        } 
-
+        for (Aviao* it : avioesVector) {
+            if (it->naQueue)
+                it->contador++;
+        }
     }
 
     return 0;

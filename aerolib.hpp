@@ -9,7 +9,7 @@
 #include <functional>
 
 #define SRAND 1111
-#define MAXRODADAS 99
+#define MAXRODADAS 10
 
 using namespace std;
 

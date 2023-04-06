@@ -11,6 +11,9 @@ Este arquivo `README.md` oferece uma documentação para a minha interpretação
 - vector
 - priority_queue
 
+## Definição de 'emergência'
+
+
 ## Prioridade de um avião
 
 A propriedade `int prioridade` da classe `Aviao` toma um valor de 0 a 4, sendo 4 a prioridade máxima. O critério para a escala de prioridade segue o modelo a seguir:
