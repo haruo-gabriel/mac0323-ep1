@@ -41,9 +41,7 @@ public:
 
 // Funções
 void gerarPistas(vector<Pista> &pistas);
-
 bool setEhPouso(float Pp);
-
 int probAvioesNaRodada(int K);
 
 #endif

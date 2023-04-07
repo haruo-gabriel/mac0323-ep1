@@ -1,7 +1,6 @@
 #include "aerolib.hpp"
 
-
-// Constructors
+// Construtores
 Pista::Pista() {
     this->livre = 1;
 }
@@ -14,7 +13,6 @@ Aviao::Aviao(float Pp, float Pe, bool ehPouso, int C, int V) {
     this->combustivel = setCombustivel(C);
     this->tempoVoo = setTempoVoo(V);
     this->prioridade = setPrioridade(Pe, this->combustivel, this->tempoVoo);
-    // cout << "Aviao " << this->id << " criado" << endl;
 };
 
 
@@ -53,11 +51,12 @@ int Aviao::setPrioridade(float Pe, int C, int V) {
         return 0;
     else if (C == -1)
         return V;
-    // else if (V < 0)
+    // else if (V == -1)
     return C;
 }
 
 
+// Funções
 void gerarPistas(vector<Pista> &pistas) {
     pistas.push_back(Pista());
     pistas.push_back(Pista());
