@@ -119,7 +119,6 @@ int main() {
         }
         cout << endl << "----------------------------------------" << endl << endl;
 
-
         // relatório da rodada
         cout << "RELATÓRIO DA RODADA:" << endl;
         cout << "    Pistas: " << pistas[0].livre << " | " << pistas[1].livre << " | " << pistas[2].livre << endl;
