@@ -1,5 +1,5 @@
-// Como compilar
-// g++ -g -Wall -std=c++11 *.cpp -o a.out
+// Como compilar e executar 
+// clear && g++ -Wall -std=c++11 *.cpp -o a.out && ./a.out
 
 #include "aerolib.hpp"
 
@@ -24,9 +24,12 @@ int main() {
     list<Aviao*> avioesMortos;
     priority_queue<Aviao*, vector<Aviao*>, decltype(comparaAviao)> queue(comparaAviao);
 
+    // modo interativo
     // cout << "Digite T, K, Pp, Pe, C e V, respectivamente: ";
     // cin >> T >> K >> Pp >> Pe >> C >> V; 
-    T = 20; K = 3; Pp = 0.5; Pe = 0.10; C = 5; V = 5;
+
+    // modo automático 
+    T = 10; K = 2; Pp = 0.5; Pe = 0.1; C = 5; V = 5;
 
     for (int t = 0; t < T; t++) {
         // relatório pré-rodada
@@ -119,10 +122,11 @@ int main() {
         }
         cout << endl << "----------------------------------------" << endl << endl;
 
-        // relatório da rodada
+        // relatório da rodada e estatísticas
         cout << "RELATÓRIO DA RODADA:" << endl;
         cout << "    Pistas: " << pistas[0].livre << " | " << pistas[1].livre << " | " << pistas[2].livre << endl;
         cout << endl;
+
         qtdeMediaCombustivelEsperandoPousar = 0;
         for (Aviao* it : pousosNaQueue) {
             cout << "    Avião " << it->id << " esperando para pousar com combustível atual " << (it->combustivel - it->contador) << " e prioridade " << it->prioridade << endl;
@@ -131,6 +135,10 @@ int main() {
         for (Aviao* it : decolagensNaQueue) {
             cout << "    Avião " << it->id << " esperando para decolar com tempo de voo atual " << it->contador << " e prioridade " << it->prioridade << endl;
         }
+        // for (Aviao* it : pousosForaQueue) {
+        // }
+        // for (Aviao* it : decolagensForaQueue) {
+        // }
         totalAvioes = pousosForaQueue.size()+pousosNaQueue.size()+decolagensForaQueue.size()+decolagensNaQueue.size()+avioesMortos.size();
         cout << endl;
         cout << "    Tempo médio de espera (pouso): " << tempoMedioEsperaPouso/pousosForaQueue.size() << endl;

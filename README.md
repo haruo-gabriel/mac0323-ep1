@@ -1,10 +1,11 @@
 *Trabalho redigido por Gabriel Haruo Hanai Takeuchi, NUSP 13671636.*
 
-# Introdução
+## Introdução
 
 Este arquivo `README.md` oferece uma documentação para a minha interpretação do EP1 de MAC0323.
+Arquivos inclusos no pacote: `main.cpp`, `aerolib.hpp`, `aerolib.cpp`, `README.md`, `README.pdf`.
 
-# Classes
+# Classes e objetos
 
 Duas classes foram usadas: `class Pista` e `class Aviao`, definidas a seguir:
 ```C++
@@ -64,6 +65,18 @@ Foram usadas, no total, 6 estruturas de dados:
     list<Aviao*> decolagensForaQueue;
     list<Aviao*> avioesMortos;
     vector<Pista> pistas;
+```
+
+## Listas ligadas auxiliares
+
+As listas ligadas foram usadas para ter maior controle e organização de todos os aviões gerados, visto que não é possível iterar sobre a `std::priority_queue`. Além disso, a separação em listas menores facilita a construção das estatísticas requisitadas no enunciado (tempo médio de espera, quantidade média de combustível, % de acidentes, etc.)
+
+```C++
+list<Aviao*> pousosForaQueue;
+list<Aviao*> decolagensForaQueue;
+list<Aviao*> pousosNaQueue;
+list<Aviao*> decolagensNaQueue;
+list<Aviao*> avioesMortos;
 ```
 
 ## A fila de prioridade
@@ -133,8 +146,62 @@ RELATÓRIO DA RODADA 20:
 Observe os primeiros aviões já deveriam ter saído da fila e inseridos em `avioesMortos`, mas nunca chegam na raíz do min heap para tomarem `pop`.
 Uma alternativa seria reconstruir a heap após toda alteração de dados para os nós serem atualizados - algo que me restou sonhar, pois minhas habilidades de C++ não deram conta por agora.
 
-## Listas ligadas auxiliares
-
-# O algoritmo
-
 # Testes
+
+Os testes podem ser reproduzidos mudando a seed em `aerolib.hpp` e as entradas em `main.cpp` (comentando ou descomentando as linhas certas para mudar de modo interativo para modo automático):
+
+```C++
+// em aerolib.hpp
+
+#define SRAND 1234
+```
+
+```C++
+// em main.cpp
+
+// modo interativo
+// cout << "Digite T, K, Pp, Pe, C e V, respectivamente: ";
+// cin >> T >> K >> Pp >> Pe >> C >> V; 
+
+// modo automático 
+T = 20; K = 3; Pp = 0.5; Pe = 0.10; C = 5; V = 5;
+```
+
+As estatísticas consideradas serão:
+- Tempo médio de espera para pousos finalizados
+- Tempo médio de espera para decolagens finalizadas
+- Quantidade média de combustível para pousos finalizados
+- Quantidade total de aviões gerados
+- Quantidade de emergências (gerado como emergência, combustível 0, tempo de voo acima do teto) finalizadas
+- Quantidade de aviões que caíram
+
+## Teste 01
+`T` pequeno, `K` pequeno, `Pp == Pd`, `Pe` pequeno, `C` médio, `V` médio.
+```C++
+#define SRAND 1234
+T = 10; K = 2; Pp = 0.5; Pe = 0.1; C = 5; V = 5;
+```
+
+```C++
+// output
+
+RELATÓRIO DA RODADA:
+    Pistas: -2 | 0 | 1
+
+    Avião QL456 esperando para pousar com combustível atual 0 e prioridade 4
+    Avião ST775 esperando para pousar com combustível atual 0 e prioridade 4
+    Avião DW649 esperando para pousar com combustível atual 2 e prioridade 3
+    Avião UX709 esperando para pousar com combustível atual 4 e prioridade 4
+    Avião OK358 esperando para decolar com tempo de voo atual 3 e prioridade 5
+    Avião XL152 esperando para decolar com tempo de voo atual 1 e prioridade 4
+
+    Tempo médio de espera (pouso): 0
+    Tempo médio de espera (decolagem): 0
+    Quantidade média de combustível (esperando pousar): 1.5
+    Quantidade média de combustível (já pousaram): 4.5
+    Quantidade total de aviões gerados: 14
+    Quantidade de emergências finalizadas: 0 (0%)
+    Quantidade de aviões *contabilizados* que caíram: 0 (0%)
+```
+
+Com esses parâmetros, os pousos e decolagens
