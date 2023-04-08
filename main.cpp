@@ -26,7 +26,7 @@ int main() {
 
     // cout << "Digite T, K, Pp, Pe, C e V, respectivamente: ";
     // cin >> T >> K >> Pp >> Pe >> C >> V; 
-    T = 100; K = 1; Pp = 0.5; Pe = 0.10; C = 5; V = 5;
+    T = 20; K = 3; Pp = 0.5; Pe = 0.10; C = 5; V = 5;
 
     for (int t = 0; t < T; t++) {
         // relatório pré-rodada
@@ -137,7 +137,7 @@ int main() {
         cout << "    Tempo médio de espera (decolagem): " << tempoMedioEsperaDecolagem/decolagensForaQueue.size() << endl;
         cout << "    Quantidade média de combustível (esperando pousar): " << qtdeMediaCombustivelEsperandoPousar/pousosNaQueue.size() << endl;
         cout << "    Quantidade média de combustível (já pousaram): " << qtdeMediaCombustivelPousaram/pousosForaQueue.size() << endl;
-        cout << "    Quantidade total de aviões: " << totalAvioes << endl;
+        cout << "    Quantidade total de aviões gerados: " << totalAvioes << endl;
         cout << "    Quantidade de emergências finalizadas: " << numEmergenciasTerminadas << " (" << (float)numEmergenciasTerminadas/totalAvioes << "%)" << endl;
         cout << "    Quantidade de aviões *contabilizados* que caíram: " << avioesMortos.size() << " ("<< (float)avioesMortos.size()/totalAvioes << "%)" << endl;
         cout << endl << "================================================================================" << endl << endl;
