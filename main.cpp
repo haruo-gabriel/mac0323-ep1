@@ -14,6 +14,7 @@ int main() {
     float Pp, Pe; // Pd = 1 - Pp
     int numEmergenciasTerminadas=0, totalAvioes=0;
     float tempoMedioEsperaPouso=0, tempoMedioEsperaDecolagem=0, qtdeMediaCombustivelEsperandoPousar=0, qtdeMediaCombustivelPousaram=0;
+
     int seed = 123;
 
     // modo interativo
@@ -21,7 +22,7 @@ int main() {
     // cin >> T >> K >> Pp >> Pe >> C >> V; 
 
     // modo automático
-    T = 1000; K = 6; Pp = 0.5; Pe = 0.1; C = 5; V = 5;
+    T = 10; K = 2; Pp = 0.5; Pe = 0.1; C = 5; V = 5;
 
     srand(seed);
 

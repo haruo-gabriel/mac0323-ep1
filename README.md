@@ -5,6 +5,14 @@
 Este arquivo `README.md` oferece uma documentação para a minha interpretação do EP1 de MAC0323.
 Arquivos inclusos no pacote: `main.cpp`, `aerolib.hpp`, `aerolib.cpp`, `README.md`, `README.pdf`.
 
+### Como compilar e executar
+
+```bash
+clear && g++ -Wall -std=c++11 *.cpp -o a.out && ./a.out
+```
+
+Os parâmetros podem ser modificados de acordo com a primeira parte da sessão [Testes](#testes)
+
 # Classes e objetos
 
 Duas classes foram usadas: `class Pista` e `class Aviao`, definidas a seguir:
@@ -43,7 +51,7 @@ public:
 ```
 *Observação:*
 A propriedade `contador` contabiliza quanto tempo um avião está na fila de prioridade. Útil para calcular o combustível restante de um avião ou o seu tempo de voo.
-A propriedade `prioridade` será explicada em breve.
+A propriedade `prioridade` será explicada em breve [nesta sessão](#prioridade-de-um-avião).
 
 
 # Estruturas de dados usadas
@@ -172,7 +180,7 @@ Todos os exemplos de testes são da última rodada, em que as estatísticas est�
 6. Quantidade de aviões *contabilizados* que caíram
 
 
-## Teste 01
+### Teste 01
 `T` pequeno, `K` pequeno, `Pp == Pd`, `Pe` pequeno, `C` médio, `V` médio.
 ```C++
 T = 10; K = 2; Pp = 0.5; Pe = 0.1; C = 5; V = 5;
@@ -247,7 +255,7 @@ Com esses parâmetros, observa-se que o algoritmo é capaz de lidar com as deman
 - Aparente baixa taxa de quedas (em média, 0 aviões caíram), mas é possível observar que há aviões com combustível atual 0 e outros com tempo de voo além do limite, os quais não foram contabilizados. É a falha do algoritmo que mencionei nas sessões anteriores.
 
 
-## Teste 02
+### Teste 02
 `T` grande, `K` pequeno, `Pp == Pd`, `Pe` pequeno, `C` médio, `V` médio.
 ```C++
 T = 1000; K = 2; Pp = 0.5; Pe = 0.1; C = 5; V = 5;
@@ -427,7 +435,7 @@ Com um `T` grande, observa-se que o algoritmo denuncia sua ineficiência:
 - Alta taxa de aviões caídos (em média, 13.2583%), além de todos os aviões que ficaram presos na fila de prioridade (pode ser percebido com a quantidade média de combustível negativa dos aviões que ainda não pousaram)
 
 
-## Teste 03
+### Teste 03
 `T` pequeno, `K` grande, `Pp == Pd`, `Pe` pequeno, `C` médio, `V` médio.
 ```C++
 T = 10; K = 6; Pp = 0.5; Pe = 0.1; C = 5; V = 5;
@@ -544,7 +552,7 @@ Com um `T` pequeno e `K` grande, observa-se:
 - Média-alta taxa de emergências finalizadas (em média, 13.4862%)
 - Média taxa de aviões caídos (em média, 8.10811%), com poucos aviões presos na fila que estão com combustível negativos, mas muitos com tempo de voo excedente.
 
-## Teste 04
+### Teste 04
 `T` grande, `K` grande, `Pp == Pd`, `Pe` pequeno, `C` médio, `V` médio.
 ```C++
 T = 1000; K = 6; Pp = 0.5; Pe = 0.1; C = 5; V = 5;
