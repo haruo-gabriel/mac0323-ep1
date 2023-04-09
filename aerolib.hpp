@@ -7,7 +7,6 @@
 #include <list>
 #include <cstdlib> 
 #include <iostream>
-#define SRAND 1111
 
 using namespace std;
 
