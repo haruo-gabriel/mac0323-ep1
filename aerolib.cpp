@@ -5,14 +5,14 @@ Pista::Pista() {
     this->livre = 1;
 }
 
-Aviao::Aviao(float Pp, float Pe, bool ehPouso, int C, int V) {
+Aviao::Aviao(float Pp, float Pe, bool ehPouso, int C, int V, int t) {
     this->contador = 0;
     this->ehPouso = ehPouso;
     this->id = setId();
     this->codigo = setCodigo(ehPouso);
     this->combustivel = setCombustivel(C);
     this->tempoVoo = setTempoVoo(V);
-    this->prioridade = setPrioridade(Pe, this->combustivel, this->tempoVoo);
+    this->prioridade = setPrioridade(Pe, this->combustivel, this->tempoVoo, t);
 };
 
 
@@ -46,13 +46,13 @@ int Aviao::setTempoVoo(int V) {
     return V < 0 ? -1 : rand() % V + 1;
 }
 
-int Aviao::setPrioridade(float Pe, int C, int V) {
+int Aviao::setPrioridade(float Pe, int combustivel, int tempoVoo, int t) {
     if ((float)rand() / RAND_MAX < Pe)
         return 0;
-    else if (C == -1)
-        return V;
+    else if (combustivel == -1)
+        return tempoVoo + t;
     // else if (V == -1)
-    return C;
+    return combustivel + t;
 }
 
 

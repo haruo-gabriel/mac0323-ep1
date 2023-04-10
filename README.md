@@ -93,65 +93,22 @@ list<Aviao*> avioesMortos;
     priority_queue<Aviao*, vector<Aviao*>, decltype(comparaAviao)> queue(comparaAviao);
 ```
 
-Como requisitado no enunciado, a estrutura `std::priority_queue` customizada armazena ponteiros para os objetos `Aviao*`. Um detalhe importante é o comparador `comparaAviao`, o qual efetivamente torna a fila em um min heap de acordo com a propriedade  `prioridade` dos aviões.
+Como requisitado no enunciado, a estrutura `std::priority_queue` customizada armazena ponteiros para os objetos `Aviao*`. Um detalhe importante é o comparador `comparaAviao`, o qual efetivamente torna a fila em um min heap de acordo com a `prioridade` dos aviões.
 
 ### Prioridade de um avião
 
 A propriedade `int prioridade` da classe `Aviao` toma
 
-- valor `0` caso o avião seja gerado como uma emergência
-- valor do combustível caso seja um pouso
-- valor do tempo máximo de voo caso seja uma decolagem
+- (valor `0`) caso o avião seja gerado como uma emergência
+- (valor do combustível + número da rodada atual) caso seja um pouso
+- (valor do tempo máximo de voo + número da rodada atual) caso seja uma decolagem
 
-Dessa forma, os aviões que tiverem o menor valor absoluto de prioridade serão tratados com mais urgência.
-A `prioridade` é determinada na geração de um avião, e permanece estática ao longo do algoritmo. Nos próximos tópicos, será explicado o motivo de `prioridade` ser estático e não dinâmico, como era desejado.
-
+A `prioridade` é determinada na geração de um avião, e permanece estática ao longo do algoritmo. 
+Os aviões que tiverem o menor valor absoluto de prioridade serão tratados com mais urgência, e a soma com o 'número da rodada atual' significa que o avião aguenta ficar na fila até a rodada (combustível ou tempo máximo + número da rodada atual).
 
 ### Definição de 'emergência'
 
-Essa sessão possui, sem dúvida, o maior caráter subjetivo e problemático do texto.
-
-Em primeira instância, uma emergência é definida no momento de geração de um avião com probabilidade `Pe` - nesse caso, `prioridade` é definida como `0`.
-Entretanto, é necessário considerar as situações em que o combustível de um avião chega a 0 e quando o tempo de espera ultrapassa 10% do limite. Infelizmente, esse algoritmo **não** lida bem com essas situações.
-
-### A ineficiência do algoritmo, explicada
-
-Como dito anteriormente, o critério da fila é a `prioridade`, cujo valor é estático e determinado na geração do avião. O problema dessa estratégia é que os aviões são objetos dinâmicos - em tese, o combustível diminui e o tempo de voo aumenta, e esses detalhes *deveriam* ser considerados.
-O grande problema encontrado foi que, mesmo se a `prioridade` dos objetos aviões fossem atualizadas à medida em que o combustível acaba ou o tempo de voo aumenta, a fila **não reposiciona automaticamente** seus nós, ou seja, ela não 'heapfica' automaticamente. Uma alternativa seria reconstruir a heap após toda alteração de dados para os nós serem atualizados - algo que me restou sonhar, pois minhas habilidades de C++ não deram conta por agora.
-Empiricamente, observa-se um acúmulo de pousos que não têm mais combustível ou decolagens que já ultrapassaram seu tempo máximo, mas não conseguem sair da fila pois sua `prioridade` foi gerada como alta.
-Exemplo da última simulação com as entradas `T = 20; K = 3; Pp = 0.5; Pe = 0.10; C = 5; V = 5;`:
-
-```
-RELATÓRIO DA RODADA 20:
-Pistas: -1 | -2 | -2
-
-Avião RB596 esperando para pousar com combustível atual -9 e prioridade 5
-Avião IV691 esperando para pousar com combustível atual -8 e prioridade 5
-Avião OB169 esperando para pousar com combustível atual -8 e prioridade 5
-Avião QM035 esperando para pousar com combustível atual -7 e prioridade 5
-Avião ZG510 esperando para pousar com combustível atual -5 e prioridade 5
-Avião MN632 esperando para pousar com combustível atual -2 e prioridade 5
-Avião FK628 esperando para pousar com combustível atual -2 e prioridade 4
-Avião WJ605 esperando para pousar com combustível atual 0 e prioridade 5
-Avião UK237 esperando para pousar com combustível atual 2 e prioridade 5
-Avião TV509 esperando para pousar com combustível atual 1 e prioridade 3
-Avião XC406 esperando para pousar com combustível atual 2 e prioridade 3
-Avião FI059 esperando para decolar com tempo de voo atual 10 e prioridade 5
-Avião SR263 esperando para decolar com tempo de voo atual 7 e prioridade 5
-Avião PM707 esperando para decolar com tempo de voo atual 7 e prioridade 5
-Avião YU735 esperando para decolar com tempo de voo atual 5 e prioridade 4
-Avião UZ096 esperando para decolar com tempo de voo atual 1 e prioridade 4
-
-Tempo médio de espera (pouso): 0.777778
-Tempo médio de espera (decolagem): 1.92308
-Quantidade média de combustível (esperando pousar): -3.27273
-Quantidade média de combustível (já pousaram): 1.88889
-Quantidade total de aviões gerados: 40
-Quantidade de emergências finalizadas: 5 (0.125%)
-Quantidade de aviões *contabilizados* que caíram: 2 (0.05%)
-```
-
-Observe os primeiros aviões já deveriam ter saído da fila e inseridos em `avioesMortos`, mas nunca chegam na raíz do min heap para tomarem `pop`.
+Em primeira instância, uma emergência é a definida no momento de geração de um avião com probabilidade `Pe` - nesse caso, `prioridade` é definida como `0`. Entretanto, aglutina-se nessa definição as situações em que o combustível de um avião chega a 0 e quando o tempo de espera ultrapassa 10% do limite.
 
 # Testes
 
@@ -191,20 +148,21 @@ int seed = 123;
 
 // output
 RELATÓRIO DA RODADA:
-Pistas: -2 | -2 | 0
+Pistas: -2 | -2 | -2
 
-Avião BU445 esperando para pousar com combustível atual 0 e prioridade 4
-Avião IB418 esperando para pousar com combustível atual 4 e prioridade 5
-Avião HA481 esperando para decolar com tempo de voo atual 7 e prioridade 5
-Avião DN325 esperando para decolar com tempo de voo atual 3 e prioridade 3
+Avião BU445 esperando para pousar com combustível atual 0 e prioridade 10
+Avião IB418 esperando para pousar com combustível atual 4 e prioridade 14
+Avião YQ056 esperando para decolar com tempo de voo atual 1 e prioridade 10
+Avião DZ240 esperando para decolar com tempo de voo atual 0 e prioridade 12
 
-Tempo médio de espera (pousos): 0.4
-Tempo médio de espera (decolagens): 0.166667
+Tempo médio de espera (pousos): 1.75
+Tempo médio de espera (decolagens): 1.83333
 Quantidade média de combustível (esperando pousar): 2
-Quantidade média de combustível (já pousaram): 3.2
+Quantidade média de combustível (já pousaram): 2.75
 Quantidade total de aviões gerados: 16
-Quantidade de emergências finalizadas: 1 (6.25%)
-Quantidade de aviões *contabilizados* que caíram: 0 (0%)
+Quantidade de emergências (gerado como emergência) desviadas: 0 (0%)
+Quantidade de emergências (outras) desviadas: 2 (12.5%)
+Quantidade de aviões que caíram: 0 (0%)
 ```
 
 ```
@@ -212,19 +170,21 @@ int seed = 456;
 
 // output
 RELATÓRIO DA RODADA:
-Pistas: -2 | -2 | 0
+Pistas: -2 | -2 | 1
 
-Avião UD881 esperando para pousar com combustível atual 1 e prioridade 5
-Avião GN788 esperando para pousar com combustível atual 2 e prioridade 5
-Avião IT652 esperando para pousar com combustível atual 5 e prioridade 5
+Avião UD881 esperando para pousar com combustível atual 1 e prioridade 11
+Avião GN788 esperando para pousar com combustível atual 2 e prioridade 12
+Avião SN091 esperando para pousar com combustível atual 1 e prioridade 11
+Avião IT652 esperando para pousar com combustível atual 5 e prioridade 15
 
-Tempo médio de espera (pousos): 0.5
-Tempo médio de espera (decolagens): 1
-Quantidade média de combustível (esperando pousar): 2.66667
-Quantidade média de combustível (já pousaram): 1.33333
+Tempo médio de espera (pousos): 1.25
+Tempo médio de espera (decolagens): 1.16667
+Quantidade média de combustível (esperando pousar): 2.25
+Quantidade média de combustível (já pousaram): 1.25
 Quantidade total de aviões gerados: 15
-Quantidade de emergências finalizadas: 1 (6.66667%)
-Quantidade de aviões *contabilizados* que caíram: 0 (0%)
+Quantidade de emergências (gerado como emergência) desviadas: 0 (0%)
+Quantidade de emergências (outras) desviadas: 1 (6.66667%)
+Quantidade de aviões que caíram: 0 (0%)
 ```
 
 ```
@@ -234,25 +194,24 @@ int seed = 789;
 RELATÓRIO DA RODADA:
 Pistas: -2 | -2 | -1
 
-Avião VN004 esperando para pousar com combustível atual 0 e prioridade 5
-Avião XO411 esperando para decolar com tempo de voo atual 8 e prioridade 5
-Avião ZJ822 esperando para decolar com tempo de voo atual 1 e prioridade 5
-Avião DU700 esperando para decolar com tempo de voo atual 0 e prioridade 5
-Avião PX142 esperando para decolar com tempo de voo atual 0 e prioridade 5
+Avião ZJ822 esperando para decolar com tempo de voo atual 1 e prioridade 14
+Avião DU700 esperando para decolar com tempo de voo atual 0 e prioridade 15
+Avião PX142 esperando para decolar com tempo de voo atual 0 e prioridade 15
 
-Tempo médio de espera (pousos): 2.75
-Tempo médio de espera (decolagens): 0.333333
-Quantidade média de combustível (esperando pousar): 0
-Quantidade média de combustível (já pousaram): 0.25
+Tempo médio de espera (pousos): 3.75
+Tempo médio de espera (decolagens): 1
+Quantidade média de combustível (esperando pousar): -nan
+Quantidade média de combustível (já pousaram): 0.5
 Quantidade total de aviões gerados: 17
-Quantidade de emergências finalizadas: 2 (11.7647%)
-Quantidade de aviões *contabilizados* que caíram: 0 (0%)
+Quantidade de emergências (gerado como emergência) desviadas: 1 (5.88235%)
+Quantidade de emergências (outras) desviadas: 3 (17.6471%)
+Quantidade de aviões que caíram: 0 (0%)
 ```
 
 Com esses parâmetros, observa-se que o algoritmo é capaz de lidar com as demandas com certa eficiência:
-- Em média, 1.216 tempos para pouso e 0.5 tempos para decolagem
-- Relativa baixa taxa de aviões colocados em situação de emergência (em média 8.227% do total de voos)
-- Aparente baixa taxa de quedas (em média, 0 aviões caíram), mas é possível observar que há aviões com combustível atual 0 e outros com tempo de voo além do limite, os quais não foram contabilizados. É a falha do algoritmo que mencionei nas sessões anteriores.
+- Em média, 2.25 tempos para pouso e 1.5 tempos para decolagem
+- Baixa taxa de aviões colocados em situação de emergência (em média 8.227% do total de voos)
+- Baixa taxa de quedas (em média, 0 aviões caíram).
 
 
 ### Teste 02

@@ -28,13 +28,13 @@ public:
     // se decolagem, combustivel = -1
     bool ehPouso;
 
-    Aviao(float Pp, float Pe, bool ehPouso, int C, int V);
+    Aviao(float Pp, float Pe, bool ehPouso, int C, int V, int t);
 
     string setId();
     string setCodigo(bool ehPouso);
     int setCombustivel(int C);
     int setTempoVoo(int V);
-    int setPrioridade(float Pe, int C, int V);
+    int setPrioridade(float Pe, int combustivel, int tempoVoo, int t);
 };
 
 

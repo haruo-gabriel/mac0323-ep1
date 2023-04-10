@@ -12,10 +12,10 @@ int main() {
 
     int T, K, C, V;
     float Pp, Pe; // Pd = 1 - Pp
-    int numEmergenciasTerminadas=0, totalAvioes=0;
+    int numEmergenciasGeradasDesviadas=0, numEmergenciasOutrasDesviadas=0, totalAvioes=0;
     float tempoMedioEsperaPouso=0, tempoMedioEsperaDecolagem=0, qtdeMediaCombustivelEsperandoPousar=0, qtdeMediaCombustivelPousaram=0;
 
-    int seed = 123;
+    int seed = 789;
 
     // modo interativo
     // cout << "Digite T, K, Pp, Pe, C e V, respectivamente: ";
@@ -34,10 +34,10 @@ int main() {
     list<Aviao*> avioesMortos;
     priority_queue<Aviao*, vector<Aviao*>, decltype(comparaAviao)> queue(comparaAviao);
 
-    for (int t = 0; t < T; t++) {
+    for (int t = 1; t <= T; t++) {
         // relatório pré-rodada
-        cout << "TEMPO " << t+1 << endl;
-        if (t > 0) {
+        cout << "TEMPO " << t << endl;
+        if (t > 1) {
             cout << endl;
             cout << "RELATÓRIO PRÉ-RODADA:" << endl;
             cout << "    Pistas: " << pistas[0].livre << " | " << pistas[1].livre << " | " << pistas[2].livre << endl << endl;
@@ -57,11 +57,11 @@ int main() {
             bool ehPouso = setEhPouso(Pp);
             Aviao* aviao;
             if (ehPouso) {
-                aviao = new Aviao(Pp, Pe, ehPouso, C, -1);
+                aviao = new Aviao(Pp, Pe, ehPouso, C, -1, t);
                 pousosNaQueue.push_back(aviao);
                 cout << "    Avião " << aviao->id << " esperando para pousar com prioridade " << aviao->prioridade << endl;
             } else {
-                aviao = new Aviao(Pp, Pe, ehPouso, -1, V);
+                aviao = new Aviao(Pp, Pe, ehPouso, -1, V, t);
                 decolagensNaQueue.push_back(aviao);
                 cout << "    Avião " << aviao->id << " esperando para decolar com prioridade " << aviao->prioridade << endl;
             }
@@ -73,25 +73,34 @@ int main() {
         // botar aviões nas pistas
         cout << "Selecionando aviões para pistas:" << endl;
         int i = 0;
-        while (!queue.empty() && (pistas[0].livre == 1 || pistas[1].livre == 1 || (pistas[2].livre == 1 && !queue.top()->ehPouso))) {
-            for (; i < 3; i++) {
-                if (pistas[i].livre == 1 && !(i == 2 && queue.top()->ehPouso)) {
-                    cout << "   Avião "<< queue.top()->id << " com prioridade " << queue.top()->prioridade << " alocado na pista " << i << endl;
-                    if (queue.top()->ehPouso) {
-                        tempoMedioEsperaPouso += queue.top()->contador;
-                        qtdeMediaCombustivelPousaram += (queue.top()->combustivel - queue.top()->contador);
-                        pousosNaQueue.remove(queue.top());
-                        pousosForaQueue.push_back(queue.top());
-                    } else {
-                        tempoMedioEsperaDecolagem += queue.top()->contador;
-                        decolagensNaQueue.remove(queue.top());
-                        decolagensForaQueue.push_back(queue.top());
+        while (!queue.empty()
+        && (pistas[0].livre == 1 || pistas[1].livre == 1 || (pistas[2].livre == 1 && !queue.top()->ehPouso))) {
+            cout << "   Avião " << queue.top()->id;
+            // aviões com combustível negativo não entram em pistas
+            if (queue.top()->ehPouso && queue.top()->combustivel < queue.top()->contador) {
+                cout << " caiu por falta de combustivel" << endl;
+                pousosNaQueue.remove(queue.top());
+                avioesMortos.push_back(queue.top());
+            } else {
+                for (; i < 3; i++) {
+                    if (pistas[i].livre == 1 && !(i == 2 && queue.top()->ehPouso)) {
+                        cout << " com prioridade " << queue.top()->prioridade << " alocado na pista " << i << endl;
+                        if (queue.top()->ehPouso) {
+                            tempoMedioEsperaPouso += queue.top()->contador;
+                            qtdeMediaCombustivelPousaram += (queue.top()->combustivel - queue.top()->contador);
+                            pousosNaQueue.remove(queue.top());
+                            pousosForaQueue.push_back(queue.top());
+                        } else {
+                            tempoMedioEsperaDecolagem += queue.top()->contador;
+                            decolagensNaQueue.remove(queue.top());
+                            decolagensForaQueue.push_back(queue.top());
+                        }
+                        pistas[i].cooldown();
+                        break;
                     }
-                    queue.pop();
-                    pistas[i].cooldown();
-                    break;
                 }
             }
+            queue.pop();
         }
         cout << endl;
 
@@ -102,32 +111,42 @@ int main() {
         while (!queue.empty() && (queue.top()->prioridade == 0
         || (queue.top()->ehPouso && (queue.top()->combustivel <= queue.top()->contador))
         || (!queue.top()->ehPouso && (queue.top()->contador > 1.1*queue.top()->tempoVoo)))) {
+            cout << "    Avião " << queue.top()->id;
             if (queue.top()->ehPouso) {
+                // avioes que caíram
                 if (queue.top()->combustivel < queue.top()->contador) {
-                    cout << "    Avião " << queue.top()->id << " caiu por falta de combustivel" << endl;
+                    cout << " caiu por falta de combustivel" << endl;
                     avioesMortos.push_back(queue.top());
-                } else if (queue.top()->combustivel == queue.top()->contador) {
-                    cout << "    Avião " << queue.top()->id << " foi desviado para outro aeroporto por falta de combustível" << endl;
+                } else {
+                    if (queue.top()->prioridade == 0) {
+                        cout << " foi desviado por emergência" << endl;
+                        qtdeMediaCombustivelPousaram += (queue.top()->combustivel - queue.top()->contador);
+                        numEmergenciasGeradasDesviadas++;
+                    } else if (queue.top()->combustivel == queue.top()->contador) {
+                        cout  << " foi desviado por falta de combustível" << endl;
+                        qtdeMediaCombustivelPousaram += 0;
+                        numEmergenciasOutrasDesviadas++;
+                    }
                     tempoMedioEsperaPouso += queue.top()->contador;
-                    qtdeMediaCombustivelPousaram += 0;
-                    numEmergenciasTerminadas++;
                 }
                 pousosNaQueue.remove(queue.top());
-            } else if (queue.top()->contador > 1.1*queue.top()->tempoVoo) {
-                cout << "    Avião " << queue.top()->id << " foi desviado por exceder o limite de tempo de voo" << endl;
-
+            } else {
+                if (queue.top()->prioridade == 0) {
+                    cout << " foi desviado por emergência" << endl;
+                    numEmergenciasGeradasDesviadas++;
+                } else if (queue.top()->contador > 1.1*queue.top()->tempoVoo){
+                    cout <<  " foi desviado por exceder o limite de tempo de voo" << endl;
+                    numEmergenciasOutrasDesviadas++;
+                }
                 tempoMedioEsperaDecolagem += queue.top()->contador;
                 decolagensNaQueue.remove(queue.top());
                 decolagensForaQueue.push_back(queue.top());
-                numEmergenciasTerminadas++;
             }
             queue.pop();
         }
         cout << endl << "----------------------------------------" << endl << endl;
 
         // relatório da rodada e estatísticas
-        if (t == T-1){
-            
         cout << "RELATÓRIO DA RODADA:" << endl;
         cout << "    Pistas: " << pistas[0].livre << " | " << pistas[1].livre << " | " << pistas[2].livre << endl;
         cout << endl;
@@ -147,11 +166,11 @@ int main() {
         cout << "    Quantidade média de combustível (esperando pousar): " << qtdeMediaCombustivelEsperandoPousar/pousosNaQueue.size() << endl;
         cout << "    Quantidade média de combustível (já pousaram): " << qtdeMediaCombustivelPousaram/pousosForaQueue.size() << endl;
         cout << "    Quantidade total de aviões gerados: " << totalAvioes << endl;
-        cout << "    Quantidade de emergências finalizadas: " << numEmergenciasTerminadas << " (" << (float)numEmergenciasTerminadas/totalAvioes*100 << "%)" << endl;
-        cout << "    Quantidade de aviões *contabilizados* que caíram: " << avioesMortos.size() << " ("<< (float)avioesMortos.size()/totalAvioes*100 << "%)" << endl;
+        cout << "    Quantidade de emergências (gerado como emergência) desviadas: " << numEmergenciasGeradasDesviadas << " (" << (float)numEmergenciasGeradasDesviadas/totalAvioes*100 << "%)" << endl;
+        cout << "    Quantidade de emergências (outras) desviadas: " << numEmergenciasOutrasDesviadas << " (" << (float)numEmergenciasOutrasDesviadas/totalAvioes*100 << "%)" << endl;
+        cout << "    Quantidade de aviões que caíram: " << avioesMortos.size() << " (" << (float)avioesMortos.size()/totalAvioes*100 << "%)" << endl;
         cout << endl << "================================================================================" << endl << endl;
 
-        }
         // atualizar contadores e cooldown
         for (int i = 0; i < 3; i++)
             if (pistas[i].livre < 1) pistas[i].livre++;
@@ -168,9 +187,8 @@ int main() {
     pousosForaQueue.clear();
     decolagensForaQueue.clear();
     avioesMortos.clear();
-    while (!queue.empty()) {
+    while (!queue.empty())
         queue.pop();
-    }
 
     return 0;
 }
