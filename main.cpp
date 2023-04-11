@@ -15,14 +15,14 @@ int main() {
     int numEmergenciasGeradasDesviadas=0, numEmergenciasOutrasDesviadas=0, totalAvioes=0;
     float tempoMedioEsperaPouso=0, tempoMedioEsperaDecolagem=0, qtdeMediaCombustivelEsperandoPousar=0, qtdeMediaCombustivelPousaram=0;
 
-    int seed = 789;
+    int seed = 123;
 
     // modo interativo
     // cout << "Digite T, K, Pp, Pe, C e V, respectivamente: ";
     // cin >> T >> K >> Pp >> Pe >> C >> V; 
 
     // modo automático
-    T = 10; K = 2; Pp = 0.5; Pe = 0.1; C = 5; V = 5;
+    T = 1000; K = 2; Pp = 0.5; Pe = 1.0; C = 2; V = 2;
 
     srand(seed);
 
